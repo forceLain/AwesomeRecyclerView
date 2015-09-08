@@ -23,6 +23,15 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
     }
 
     private void fill(RecyclerView.Recycler recycler) {
+
+        View anchorView = getAnchorView();
+        int anchorPos = 0;
+        int topOffset = 0;
+        if (anchorView != null){
+            anchorPos = getPosition(anchorView);
+            topOffset = getDecoratedTop(anchorView);
+        }
+
         for (int i = 0, cnt = getChildCount(); i < cnt; i++) {
             View view = getChildAt(i);
             int pos = getPosition(view);
@@ -31,8 +40,7 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
             }
         }
 
-        int pos = 0;
-        int topOffset = 0;
+        int pos = anchorPos;
         boolean fillDown = true;
         int height = getHeight();
 
@@ -47,6 +55,29 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
             fillDown = (topOffset <= height);
             pos++;
         }
+    }
 
+    private View getAnchorView() {
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View view = getChildAt(i);
+            int decoratedBottom = getDecoratedBottom(view);
+            if (decoratedBottom > 0){
+                return view;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean canScrollVertically() {
+        return true;
+    }
+
+    @Override
+    public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
+        offsetChildrenVertical(-dy);
+        fill(recycler);
+        return -dy;
     }
 }
