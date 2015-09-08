@@ -35,7 +35,8 @@ public class ArticleAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
         ArticleViewHolder articleViewHolder = (ArticleViewHolder) viewHolder;
         Article article = articles.get(position);
-        articleViewHolder.textView.setText(article.text);
+        articleViewHolder.textContent.setText(article.text);
+        articleViewHolder.textTitle.setText(article.title);
         if (article.image.startsWith(SCHEME_ASSETS)){
             String fileName = article.image.replace(SCHEME_ASSETS, "");
             AssetManager assetManager = viewHolder.itemView.getContext().getAssets();
@@ -65,12 +66,14 @@ public class ArticleAdapter extends RecyclerView.Adapter {
     public static class ArticleViewHolder extends RecyclerView.ViewHolder {
 
         public ImageView imageView;
-        public TextView textView;
+        public TextView textContent;
+        public TextView textTitle;
 
         public ArticleViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.article_image);
-            textView = (TextView) itemView.findViewById(R.id.article_text);
+            textContent = (TextView) itemView.findViewById(R.id.article_text);
+            textTitle = (TextView) itemView.findViewById(R.id.article_title);
         }
     }
 }

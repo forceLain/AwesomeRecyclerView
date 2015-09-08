@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
+              xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
-              android:layout_height="wrap_content">
+              android:layout_height="wrap_content"
+              android:background="@android:color/white"
+              android:orientation="vertical">
 
     <ImageView
         android:id="@+id/article_image"
@@ -10,9 +12,20 @@
         android:layout_height="wrap_content"/>
 
     <TextView
+        android:id="@+id/article_title"
+        style="@style/TextAppearance.AppCompat.Large"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="8dp"
+        tools:text="A title"/>
+
+    <TextView
         android:id="@+id/article_text"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        tools:text="Quisque at lacinia justo. Donec egestas ligula justo, eu tempus metus lacinia nec. Maecenas quis pretium tortor. Nulla hendrerit dignissim justo, id feugiat augue. Integer laoreet suscipit nunc"/>
 
 
 </LinearLayout>
