@@ -2,10 +2,13 @@ package com.forcelain.android.awesomerecyclerview.view;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
 public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
+
+    private SparseArray<View> viewCache = new SparseArray<>();
 
     public AwesomeLayoutManager(Context context) {
 
@@ -32,12 +35,16 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
             topOffset = getDecoratedTop(anchorView);
         }
 
+        viewCache.clear();
+
         for (int i = 0, cnt = getChildCount(); i < cnt; i++) {
             View view = getChildAt(i);
             int pos = getPosition(view);
-            if (pos == RecyclerView.NO_POSITION) {
-                recycler.recycleView(view);
-            }
+            viewCache.put(pos, view);
+        }
+
+        for (int i = 0; i < viewCache.size(); i++) {
+            detachView(viewCache.valueAt(i));
         }
 
         int pos = anchorPos;
@@ -45,12 +52,18 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
         int height = getHeight();
 
         while (fillDown){
-            View view = recycler.getViewForPosition(pos);
-            addView(view);
-            measureChildWithMargins(view, 0, 0);
-            int decoratedMeasuredHeight = getDecoratedMeasuredHeight(view);
-            int decoratedMeasuredWidth = getDecoratedMeasuredWidth(view);
-            layoutDecorated(view, 0, topOffset, decoratedMeasuredWidth, topOffset + decoratedMeasuredHeight);
+            View view = viewCache.get(pos);
+            if (view == null){
+                view = recycler.getViewForPosition(pos);
+                addView(view);
+                measureChildWithMargins(view, 0, 0);
+                int decoratedMeasuredHeight = getDecoratedMeasuredHeight(view);
+                int decoratedMeasuredWidth = getDecoratedMeasuredWidth(view);
+                layoutDecorated(view, 0, topOffset, decoratedMeasuredWidth, topOffset + decoratedMeasuredHeight);
+            } else {
+                attachView(view);
+                viewCache.remove(pos);
+            }
             topOffset = getDecoratedBottom(view);
             fillDown = (topOffset <= height);
             pos++;
