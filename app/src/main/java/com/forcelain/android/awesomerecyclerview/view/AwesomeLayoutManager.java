@@ -89,8 +89,37 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
 
     @Override
     public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
-        offsetChildrenVertical(-dy);
+        int delta = scrollVerticallyInternal(dy);
+        offsetChildrenVertical(-delta);
         fill(recycler);
-        return -dy;
+        return delta;
+    }
+
+    private int scrollVerticallyInternal(int dy) {
+        int childCount = getChildCount();
+        if (childCount == 0){
+            return 0;
+        }
+
+        final View topView = getChildAt(0);
+        final View bottomView = getChildAt(childCount - 1);
+
+        int viewSpan = getDecoratedBottom(bottomView) - getDecoratedTop(topView);
+        if (viewSpan <= getHeight()) {
+            return 0;
+        }
+
+        int delta = 0;
+        if (dy < 0){
+            View view = getChildAt(0);
+            int viewTop = getDecoratedTop(view);
+            delta = Math.max(viewTop, dy);
+        } else if (dy > 0){
+            View lastView = getChildAt(childCount - 1);
+            int viewBottom = getDecoratedBottom(lastView);
+            int parentBottom = getHeight();
+            delta = Math.min(viewBottom - parentBottom, dy);
+        }
+        return delta;
     }
 }
