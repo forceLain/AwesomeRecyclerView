@@ -2,13 +2,13 @@ package com.forcelain.android.awesomerecyclerview.view;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
 public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
 
+    private static final float THRESHOLD = 0.75f;
     private SparseArray<View> viewCache = new SparseArray<>();
 
     public AwesomeLayoutManager(Context context) {
@@ -91,6 +91,28 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
             viewTop = getDecoratedBottom(view);
             fillDown = viewTop <= height;
             pos++;
+        }
+        
+        updateViewScale();
+    }
+
+    private void updateViewScale() {
+        int childCount = getChildCount();
+        int height = getHeight();
+        int thresholdPx = (int) (height * THRESHOLD);
+        for (int i = 0; i < childCount; i++) {
+            float scale = 1f;
+            View view = getChildAt(i);
+            int viewTop = getDecoratedTop(view);
+            if (viewTop >= thresholdPx){
+                int delta = viewTop - thresholdPx;
+                scale = (height - delta) / (float)height;
+                scale = Math.max(scale, 0);
+            }
+            view.setPivotX(view.getHeight()/2);
+            view.setPivotY(view.getHeight() / -2);
+            view.setScaleX(scale);
+            view.setScaleY(scale);
         }
     }
 

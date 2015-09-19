@@ -29,6 +29,12 @@ public class MainActivity extends AppCompatActivity {
         dataProvider = new FakeDataProvider(this);
         List<Article> articles = dataProvider.getArticles();
         adapter.setArticles(articles);
+        recyclerView.setChildDrawingOrderCallback(new RecyclerView.ChildDrawingOrderCallback() {
+            @Override
+            public int onGetChildDrawingOrder(int childCount, int i) {
+                return childCount - i - 1;
+            }
+        });
     }
 
     @Override
