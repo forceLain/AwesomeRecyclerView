@@ -1,5 +1,7 @@
 package com.forcelain.android.awesomerecyclerview.view;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Rect;
 import android.support.annotation.Nullable;
@@ -8,9 +10,12 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
+
+    private static final long TRANSITION_DURATION_MS = 300;
 
     public enum Orientation {VERTICAL, HORIZONTAL}
 
@@ -47,6 +52,71 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
         detachAndScrapAttachedViews(recycler);
         fill(recycler);
         mAnchorPos = 0;
+    }
+
+    public void openItem(int pos) {
+        if (orientation == Orientation.VERTICAL){
+            View viewToOpen = null;
+            int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                View view = getChildAt(i);
+                int position = getPosition(view);
+                if (position == pos){
+                    viewToOpen = view;
+                }
+            }
+            if (viewToOpen != null){
+                openView(viewToOpen);
+            }
+        }
+    }
+
+    private void openView(final View viewToAnimate) {
+        final ArrayList<ViewAnimationInfo> animationInfos = new ArrayList<>();
+        int childCount = getChildCount();
+        int animatedPos = getPosition(viewToAnimate);
+        for (int i = 0; i < childCount; i++) {
+            View view = getChildAt(i);
+            int pos = getPosition(view);
+            int posDelta = pos - animatedPos;
+            final ViewAnimationInfo viewAnimationInfo = new ViewAnimationInfo();
+            viewAnimationInfo.startTop = getDecoratedTop(view);
+            viewAnimationInfo.startBottom = getDecoratedBottom(view);
+            viewAnimationInfo.finishTop = getHeight() * posDelta;
+            viewAnimationInfo.finishBottom = getHeight() * posDelta + getHeight();
+            viewAnimationInfo.view = view;
+            animationInfos.add(viewAnimationInfo);
+        }
+        ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
+        animator.setDuration(TRANSITION_DURATION_MS);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float animationProgress = (float) animation.getAnimatedValue();
+                for (ViewAnimationInfo animationInfo : animationInfos) {
+                    int top = (int) (animationInfo.startTop + animationProgress * (animationInfo.finishTop - animationInfo.startTop));
+                    int bottom = (int) (animationInfo.startBottom + animationProgress * (animationInfo.finishBottom - animationInfo.startBottom));
+                    layoutDecorated(animationInfo.view, 0, top, getWidth(), bottom);
+                }
+                updateViewScale();
+            }
+        });
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {}
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                setOrientation(Orientation.HORIZONTAL);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {}
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {}
+        });
+        animator.start();
     }
 
     private void fill(RecyclerView.Recycler recycler) {
@@ -93,16 +163,15 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
         int viewBottom = anchorTop;
         int viewHeight = (int) (getHeight() * ITEM_HEIGHT_PERCENT);
         final int widthSpec = View.MeasureSpec.makeMeasureSpec(getWidth(), View.MeasureSpec.EXACTLY);
-        final int heightSpec = View.MeasureSpec.makeMeasureSpec(viewHeight, View.MeasureSpec.AT_MOST);
+        final int heightSpec = View.MeasureSpec.makeMeasureSpec(getHeight(), View.MeasureSpec.EXACTLY);
         while (fillUp && pos >= 0){
             View view = viewCache.get(pos);
             if (view == null){
                 view = recycler.getViewForPosition(pos);
                 addView(view, 0);
                 measureChildWithDecorationsAndMargin(view, widthSpec, heightSpec);
-                int decoratedMeasuredHeight = getDecoratedMeasuredHeight(view);
                 int decoratedMeasuredWidth = getDecoratedMeasuredWidth(view);
-                layoutDecorated(view, 0, viewBottom - decoratedMeasuredHeight, decoratedMeasuredWidth, viewBottom);
+                layoutDecorated(view, 0, viewBottom - viewHeight, decoratedMeasuredWidth, viewBottom);
             } else {
                 attachView(view);
                 viewCache.remove(pos);
@@ -130,7 +199,7 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
         int itemCount = getItemCount();
         int viewHeight = (int) (getHeight() * ITEM_HEIGHT_PERCENT);
         final int widthSpec = View.MeasureSpec.makeMeasureSpec(getWidth(), View.MeasureSpec.EXACTLY);
-        final int heightSpec = View.MeasureSpec.makeMeasureSpec(viewHeight, View.MeasureSpec.AT_MOST);
+        final int heightSpec = View.MeasureSpec.makeMeasureSpec(getHeight(), View.MeasureSpec.EXACTLY);
 
         while (fillDown && pos < itemCount){
             View view = viewCache.get(pos);
@@ -138,9 +207,8 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
                 view = recycler.getViewForPosition(pos);
                 addView(view);
                 measureChildWithDecorationsAndMargin(view, widthSpec, heightSpec);
-                int decoratedMeasuredHeight = getDecoratedMeasuredHeight(view);
                 int decoratedMeasuredWidth = getDecoratedMeasuredWidth(view);
-                layoutDecorated(view, 0, viewTop, decoratedMeasuredWidth, viewTop + decoratedMeasuredHeight);
+                layoutDecorated(view, 0, viewTop, decoratedMeasuredWidth, viewTop + viewHeight);
             } else {
                 attachView(view);
                 viewCache.remove(pos);
@@ -400,5 +468,13 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
                     View.MeasureSpec.getSize(spec) - startInset - endInset, mode);
         }
         return spec;
+    }
+
+    private static class ViewAnimationInfo {
+        int startTop;
+        int startBottom;
+        int finishTop;
+        int finishBottom;
+        View view;
     }
 }

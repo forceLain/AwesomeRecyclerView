@@ -39,26 +39,23 @@ public class MainActivity extends AppCompatActivity {
         adapter.setItemClickListener(new ArticleAdapter.OnItemClickListener() {
             @Override
             public void onItemClicked(int pos) {
-                toggleOrientation();
+                layoutManager.openItem(pos);
             }
         });
-    }
-
-    private void toggleOrientation() {
-        AwesomeLayoutManager.Orientation orientation = layoutManager.getOrientation();
-        switch (orientation) {
-            case VERTICAL:
-                layoutManager.setOrientation(AwesomeLayoutManager.Orientation.HORIZONTAL);
-                break;
-            case HORIZONTAL:
-                layoutManager.setOrientation(AwesomeLayoutManager.Orientation.VERTICAL);
-                break;
-        }
     }
 
     @Override
     protected void onDestroy() {
         dataProvider = null;
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (layoutManager.getOrientation() == AwesomeLayoutManager.Orientation.HORIZONTAL){
+            layoutManager.setOrientation(AwesomeLayoutManager.Orientation.VERTICAL);
+        } else {
+            super.onBackPressed();
+        }
     }
 }
