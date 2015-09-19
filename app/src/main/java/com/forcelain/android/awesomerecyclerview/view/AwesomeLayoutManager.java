@@ -121,6 +121,7 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
 
     private int scrollVerticallyInternal(int dy) {
         int childCount = getChildCount();
+        int itemCount = getItemCount();
         if (childCount == 0){
             return 0;
         }
@@ -135,14 +136,24 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
 
         int delta = 0;
         if (dy < 0){
-            View view = getChildAt(0);
-            int viewTop = getDecoratedTop(view);
-            delta = Math.max(viewTop, dy);
+            View firstView = getChildAt(0);
+            int firstViewAdapterPos = getPosition(firstView);
+            if (firstViewAdapterPos > 0){
+                delta = dy;
+            } else {
+                int viewTop = getDecoratedTop(firstView);
+                delta = Math.max(viewTop, dy);
+            }
         } else if (dy > 0){
             View lastView = getChildAt(childCount - 1);
-            int viewBottom = getDecoratedBottom(lastView);
-            int parentBottom = getHeight();
-            delta = Math.min(viewBottom - parentBottom, dy);
+            int lastViewAdapterPos = getPosition(lastView);
+            if (lastViewAdapterPos < itemCount - 1){
+                delta = dy;
+            } else {
+                int viewBottom = getDecoratedBottom(lastView);
+                int parentBottom = getHeight();
+                delta = Math.min(viewBottom - parentBottom, dy);
+            }
         }
         return delta;
     }
