@@ -2,6 +2,7 @@ package com.forcelain.android.awesomerecyclerview.view;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,10 +30,10 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
 
         View anchorView = getAnchorView();
         int anchorPos = 0;
-        int topOffset = 0;
+        int anchorTop = 0;
         if (anchorView != null){
             anchorPos = getPosition(anchorView);
-            topOffset = getDecoratedTop(anchorView);
+            anchorTop = getDecoratedTop(anchorView);
         }
 
         viewCache.clear();
@@ -47,11 +48,34 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
             detachView(viewCache.valueAt(i));
         }
 
-        int pos = anchorPos;
+        boolean fillUp = true;
+        int pos = anchorPos - 1;
+        int viewBottom = anchorTop;
+        while (fillUp && pos >= 0){
+            View view = viewCache.get(pos);
+            if (view == null){
+                view = recycler.getViewForPosition(pos);
+                addView(view, 0);
+                measureChildWithMargins(view, 0, 0);
+                int decoratedMeasuredHeight = getDecoratedMeasuredHeight(view);
+                int decoratedMeasuredWidth = getDecoratedMeasuredWidth(view);
+                layoutDecorated(view, 0, viewBottom - decoratedMeasuredHeight, decoratedMeasuredWidth, viewBottom);
+            } else {
+                attachView(view);
+                viewCache.remove(pos);
+            }
+            viewBottom = getDecoratedTop(view);
+            fillUp = (viewBottom > 0);
+            pos--;
+        }
+
+        pos = anchorPos;
         boolean fillDown = true;
         int height = getHeight();
+        int viewTop = anchorTop;
+        int itemCount = getItemCount();
 
-        while (fillDown){
+        while (fillDown && pos < itemCount){
             View view = viewCache.get(pos);
             if (view == null){
                 view = recycler.getViewForPosition(pos);
@@ -59,13 +83,13 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
                 measureChildWithMargins(view, 0, 0);
                 int decoratedMeasuredHeight = getDecoratedMeasuredHeight(view);
                 int decoratedMeasuredWidth = getDecoratedMeasuredWidth(view);
-                layoutDecorated(view, 0, topOffset, decoratedMeasuredWidth, topOffset + decoratedMeasuredHeight);
+                layoutDecorated(view, 0, viewTop, decoratedMeasuredWidth, viewTop + decoratedMeasuredHeight);
             } else {
                 attachView(view);
                 viewCache.remove(pos);
             }
-            topOffset = getDecoratedBottom(view);
-            fillDown = (topOffset <= height);
+            viewTop = getDecoratedBottom(view);
+            fillDown = viewTop <= height;
             pos++;
         }
     }
