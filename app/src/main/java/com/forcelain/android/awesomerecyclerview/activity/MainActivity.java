@@ -3,6 +3,7 @@ package com.forcelain.android.awesomerecyclerview.activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
 import com.forcelain.android.awesomerecyclerview.R;
 import com.forcelain.android.awesomerecyclerview.data.DataProvider;
@@ -22,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         layoutManager = new AwesomeLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         ArticleAdapter adapter = new ArticleAdapter();
@@ -40,6 +41,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClicked(int pos) {
                 layoutManager.openItem(pos);
+            }
+        });
+        findViewById(R.id.test_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recyclerView.smoothScrollToPosition(4);
             }
         });
     }

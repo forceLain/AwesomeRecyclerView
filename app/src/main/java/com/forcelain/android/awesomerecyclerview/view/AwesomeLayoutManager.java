@@ -3,9 +3,12 @@ package com.forcelain.android.awesomerecyclerview.view;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +19,7 @@ import java.util.HashMap;
 public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
 
     private static final long TRANSITION_DURATION_MS = 300;
+    private static final String TAG = "AwesomeLayoutManager";
 
     public enum Orientation {VERTICAL, HORIZONTAL}
 
@@ -342,6 +346,41 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
             }
         }
         return viewsOnScreen.get(maxSquare);
+    }
+
+    @Override
+    public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state, int position) {
+        if (position >= getItemCount()) {
+            Log.e(TAG, "Cannot scroll to " + position + ", item count is " + getItemCount());
+            return;
+        }
+
+        LinearSmoothScroller scroller = new LinearSmoothScroller(recyclerView.getContext()) {
+            @Override
+            public PointF computeScrollVectorForPosition(int targetPosition) {
+                return AwesomeLayoutManager.this.computeScrollVectorForPosition(targetPosition);
+            }
+
+            @Override
+            protected int getVerticalSnapPreference() {
+                return SNAP_TO_START;
+            }
+        };
+        scroller.setTargetPosition(position);
+        startSmoothScroll(scroller);
+    }
+
+    private PointF computeScrollVectorForPosition(int targetPosition) {
+        if (getChildCount() == 0) {
+            return null;
+        }
+        final int firstChildPos = getPosition(getChildAt(0));
+        final int direction = targetPosition < firstChildPos ? -1 : 1;
+        if (orientation == Orientation.HORIZONTAL) {
+            return new PointF(direction, 0);
+        } else {
+            return new PointF(0, direction);
+        }
     }
 
     @Override
