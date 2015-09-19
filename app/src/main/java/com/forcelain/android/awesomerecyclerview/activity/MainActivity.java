@@ -16,13 +16,14 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private DataProvider dataProvider;
+    private AwesomeLayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        AwesomeLayoutManager layoutManager = new AwesomeLayoutManager(this);
+        layoutManager = new AwesomeLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         ArticleAdapter adapter = new ArticleAdapter();
         recyclerView.setAdapter(adapter);
@@ -35,6 +36,24 @@ public class MainActivity extends AppCompatActivity {
                 return childCount - i - 1;
             }
         });
+        adapter.setItemClickListener(new ArticleAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClicked(int pos) {
+                toggleOrientation();
+            }
+        });
+    }
+
+    private void toggleOrientation() {
+        AwesomeLayoutManager.Orientation orientation = layoutManager.getOrientation();
+        switch (orientation) {
+            case VERTICAL:
+                layoutManager.setOrientation(AwesomeLayoutManager.Orientation.HORIZONTAL);
+                break;
+            case HORIZONTAL:
+                layoutManager.setOrientation(AwesomeLayoutManager.Orientation.VERTICAL);
+                break;
+        }
     }
 
     @Override

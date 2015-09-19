@@ -24,6 +24,15 @@ public class ArticleAdapter extends RecyclerView.Adapter {
     private static final String TAG = "ArticleAdapter";
     private static final String SCHEME_ASSETS = "assets://";
     private List<Article> articles;
+    private OnItemClickListener itemClickListener;
+
+    public OnItemClickListener getItemClickListener() {
+        return itemClickListener;
+    }
+
+    public void setItemClickListener(OnItemClickListener itemClickListener) {
+        this.itemClickListener = itemClickListener;
+    }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int position) {
@@ -32,7 +41,7 @@ public class ArticleAdapter extends RecyclerView.Adapter {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, final int position) {
         ArticleViewHolder articleViewHolder = (ArticleViewHolder) viewHolder;
         Article article = articles.get(position);
         articleViewHolder.textContent.setText(article.text);
@@ -51,6 +60,14 @@ public class ArticleAdapter extends RecyclerView.Adapter {
                 IOUtils.closeQuietly(is);
             }
         }
+        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (itemClickListener != null){
+                    itemClickListener.onItemClicked(position);
+                }
+            }
+        });
     }
 
     @Override
@@ -75,5 +92,9 @@ public class ArticleAdapter extends RecyclerView.Adapter {
             textContent = (TextView) itemView.findViewById(R.id.article_text);
             textTitle = (TextView) itemView.findViewById(R.id.article_title);
         }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClicked(int pos);
     }
 }
