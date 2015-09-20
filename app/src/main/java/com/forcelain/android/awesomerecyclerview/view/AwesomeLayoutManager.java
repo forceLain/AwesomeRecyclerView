@@ -148,6 +148,10 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
                 fillRight(anchorView, recycler);
                 break;
         }
+
+        for (int i=0; i < viewCache.size(); i++) {
+            recycler.recycleView(viewCache.valueAt(i));
+        }
         
         updateViewScale();
     }
