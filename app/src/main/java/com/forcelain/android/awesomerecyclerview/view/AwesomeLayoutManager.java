@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
 
@@ -323,8 +322,9 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
 
     private View getAnchorView() {
         int childCount = getChildCount();
-        HashMap<Integer, View> viewsOnScreen = new HashMap<>();
         Rect mainRect = new Rect(0, 0, getWidth(), getHeight());
+        int maxSquare = 0;
+        View anchorView = null;
         for (int i = 0; i < childCount; i++) {
             View view = getChildAt(i);
             int top = getDecoratedTop(view);
@@ -335,21 +335,12 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
             boolean intersect = viewRect.intersect(mainRect);
             if (intersect){
                 int square = viewRect.width() * viewRect.height();
-                viewsOnScreen.put(square, view);
+                if (square > maxSquare){
+                    anchorView = view;
+                }
             }
         }
-        if (viewsOnScreen.isEmpty()){
-            return null;
-        }
-        Integer maxSquare = null;
-        for (Integer square : viewsOnScreen.keySet()) {
-            if (maxSquare == null){
-                maxSquare = square;
-            } else {
-                maxSquare = Math.max(maxSquare, square);
-            }
-        }
-        return viewsOnScreen.get(maxSquare);
+        return anchorView;
     }
 
     @Override
