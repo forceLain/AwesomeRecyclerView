@@ -151,7 +151,7 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
         for (int i=0; i < viewCache.size(); i++) {
             recycler.recycleView(viewCache.valueAt(i));
         }
-        
+
         updateViewScale();
     }
 
@@ -180,7 +180,7 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
                 int decoratedMeasuredWidth = getDecoratedMeasuredWidth(view);
                 layoutDecorated(view, 0, viewBottom - viewHeight, decoratedMeasuredWidth, viewBottom);
             } else {
-                attachView(view);
+                attachView(view, 0);
                 viewCache.remove(pos);
             }
             viewBottom = getDecoratedTop(view);
