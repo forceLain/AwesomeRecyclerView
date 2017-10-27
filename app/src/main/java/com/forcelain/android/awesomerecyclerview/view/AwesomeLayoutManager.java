@@ -253,7 +253,7 @@ public class AwesomeLayoutManager extends RecyclerView.LayoutManager {
                 int decoratedMeasuredWidth = getDecoratedMeasuredWidth(view);
                 layoutDecorated(view, viewRight - decoratedMeasuredWidth, 0, viewRight, decoratedMeasuredHeight);
             } else {
-                attachView(view);
+                attachView(view, 0);
                 viewCache.remove(pos);
             }
             viewRight = getDecoratedLeft(view);
